@@ -79,6 +79,24 @@ public class studentdao {
         return students;
     }
 
+
+    public List<String> getJoinedClubs(String studentName) {
+        Document student = collection.find(eq("Fullname", studentName)).first();
+        if (student != null && student.containsKey("Joined_Clubs")) {
+            return (List<String>) student.get("Joined_Clubs");
+        }
+        return new ArrayList<>();
+    }
+
+    public List<String> getJoinedEvents(String studentName) {
+        Document student = collection.find(eq("Fullname", studentName)).first();
+        if (student != null && student.containsKey("Registered_Events")) {
+            return (List<String>) student.get("Registered_Events");
+        }
+        return new ArrayList<>();
+    }
+
+
     public void addClubToStudent(String studentFullName, String clubName) {
 
         collection.updateOne(

@@ -64,10 +64,12 @@ public class StudentDashboard extends JFrame {
 
         clubsTable = new JTable(clubsModel);
 
-        // Get all approved clubs (you already have this DAO method)
+        List<String> joinedClubs = studentDao.getJoinedClubs(fullName);
         List<Document> approvedClubs = clubDao.getApprovedClubs();
         for (Document club : approvedClubs) {
+
             String clubName = club.getString("Club_name");
+            if (!joinedClubs.contains(clubName)) {
             String description = club.getString("Description");
             String adminName = club.getString("Admin_name");
 
@@ -77,7 +79,7 @@ public class StudentDashboard extends JFrame {
                     adminName,
                     false // default unchecked
             });
-        }
+        }}
 
         // Listen for checkbox changes
         clubsTable.getModel().addTableModelListener(e -> {
@@ -128,10 +130,13 @@ public class StudentDashboard extends JFrame {
 
          eventsTable = new JTable(eventsModel);
 
-        // Get all approved clubs (you already have this DAO method)
+
         List<Document> approvedEvents = eventDao.getApprovedEvents();
+
+        List<String> joinedEvents = studentDao.getJoinedEvents(fullName);
         for (Document event : approvedEvents) {
             String title = event.getString("Title");
+            if (!joinedEvents.contains(title)) {
             Date date = event.getDate("Date");
             String clubName = event.getString("Club_Name");
 
@@ -141,7 +146,7 @@ public class StudentDashboard extends JFrame {
                     clubName,
                     false // default unchecked
             });
-        }
+        }}
 
         // Listen for checkbox changes
         eventsTable.getModel().addTableModelListener(e -> {
