@@ -1,95 +1,119 @@
 package org.example.CampusConnect;
+
 import org.example.CampusConnect.Club.ClubRegistration;
 import org.example.CampusConnect.Student.StudentRegistration;
 import org.example.CampusConnect.Admin.AdminLogin;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class Main extends JFrame {
-
     public Main() {
-
-
         setTitle("CampusConnect");
-        setSize(750, 450);
+        setSize(800, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 0));
 
-
-        JPanel headerPanel = new JPanel();
-        headerPanel.setBackground(new Color(33, 150, 243));
-        headerPanel.setPreferredSize(new Dimension(750, 100));
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        // ----- HEADER -----
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(25, 118, 210));
+        headerPanel.setPreferredSize(new Dimension(800, 120));
 
         JLabel titleLabel = new JLabel("CampusConnect", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel subTitleLabel = new JLabel("University Event & Club Management System", SwingConstants.CENTER);
-        subTitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        subTitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         subTitleLabel.setForeground(Color.WHITE);
-        subTitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        headerPanel.add(Box.createVerticalStrut(15));
-        headerPanel.add(titleLabel);
-        headerPanel.add(Box.createVerticalStrut(5));
-        headerPanel.add(subTitleLabel);
+        JPanel headerTextPanel = new JPanel(new GridLayout(2, 1));
+        headerTextPanel.setOpaque(false);
+        headerTextPanel.add(titleLabel);
+        headerTextPanel.add(subTitleLabel);
 
+        headerPanel.add(headerTextPanel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 30, 50));
-        buttonPanel.setBackground(Color.WHITE);
+        // ----- MAIN CONTENT -----
+        JPanel contentPanel = new JPanel();
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(15, 20, 15, 20);
 
-        JButton studentBtn = new JButton("Student");
-        JButton adminBtn = new JButton("Admin");
-        JButton clubBtn = new JButton("Club");
+        // Buttons with consistent styling
+        JButton studentBtn = createStyledButton("Student");
+        JButton adminBtn = createStyledButton("Admin");
+        JButton clubBtn = createStyledButton("Club");
 
-        Dimension btnSize = new Dimension(120, 40);
-        studentBtn.setPreferredSize(btnSize);
-        adminBtn.setPreferredSize(btnSize);
-        clubBtn.setPreferredSize(btnSize);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        contentPanel.add(studentBtn, gbc);
 
+        gbc.gridx = 1;
+        contentPanel.add(adminBtn, gbc);
 
-        buttonPanel.add(studentBtn);
-        buttonPanel.add(adminBtn);
-        buttonPanel.add(clubBtn);
+        gbc.gridx = 2;
+        contentPanel.add(clubBtn, gbc);
 
+        // ----- FOOTER -----
+        JPanel footerPanel = new JPanel();
+        footerPanel.setBackground(new Color(240, 240, 240));
+        footerPanel.setPreferredSize(new Dimension(800, 40));
 
+        JLabel footerLabel = new JLabel("© 2025 CampusConnect - All Rights Reserved");
+        footerLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        footerLabel.setForeground(new Color(100, 100, 100));
 
+        footerPanel.add(footerLabel);
 
+        // Add panels to frame
         add(headerPanel, BorderLayout.NORTH);
-        add(buttonPanel, BorderLayout.CENTER);
+        add(contentPanel, BorderLayout.CENTER);
+        add(footerPanel, BorderLayout.SOUTH);
 
+        // Actions
         studentBtn.addActionListener(e -> {
             new StudentRegistration().setVisible(true);
             dispose();
         });
 
-        adminBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AdminLogin().setVisible(true);
-                dispose();
-            }
+        adminBtn.addActionListener(e -> {
+            new AdminLogin().setVisible(true);
+            dispose();
         });
 
-        clubBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new ClubRegistration().setVisible(true);
-                dispose();
-            }
+        clubBtn.addActionListener(e -> {
+            new ClubRegistration().setVisible(true);
+            dispose();
         });
-
-
     }
 
+    // Helper method for styled buttons
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setPreferredSize(new Dimension(150, 50));
+        button.setBackground(new Color(33, 150, 243));
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // Hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(25, 118, 210));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(33, 150, 243));
+            }
+        });
+
+        return button;
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

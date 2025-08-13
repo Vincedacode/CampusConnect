@@ -1,4 +1,5 @@
 package org.example.CampusConnect.Admin;
+
 import org.bson.Document;
 import org.example.CampusConnect.DAO.admindao;
 
@@ -6,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 public class AdminLogin extends JFrame {
     private JPanel inputPanel;
     private JTextField emailField;
@@ -13,53 +15,74 @@ public class AdminLogin extends JFrame {
     JButton loginButton;
 
     public AdminLogin() {
-
-        setTitle("Admin Login System");
+        setTitle("Admin Login - CampusConnect");
         setSize(750, 450);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
+        // Header
+        JLabel titleLabel = new JLabel("Admin Login", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        titleLabel.setForeground(new Color(45, 52, 54));
+        add(titleLabel, BorderLayout.NORTH);
+
+        // Main input panel
         inputPanel = new JPanel(new GridBagLayout());
-        inputPanel.setBackground(Color.lightGray);
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        inputPanel.setBackground(Color.WHITE);
+        inputPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(30, 30, 30, 30),
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true)
+        ));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(15, 10, 15, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
-
+        // Email Label
         gbc.gridx = 0;
         gbc.gridy = 0;
-        inputPanel.add(new JLabel("Email: "), gbc);
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        inputPanel.add(emailLabel, gbc);
 
-
+        // Email Field
         gbc.gridx = 1;
         emailField = new JTextField(20);
+        emailField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         inputPanel.add(emailField, gbc);
 
-
+        // Password Label
         gbc.gridx = 0;
         gbc.gridy = 1;
-        inputPanel.add(new JLabel("Password: "), gbc);
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        inputPanel.add(passwordLabel, gbc);
 
-
+        // Password Field
         gbc.gridx = 1;
         passwordField = new JPasswordField(20);
+        passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         inputPanel.add(passwordField, gbc);
 
+        // Login Button
         gbc.gridx = 1;
         gbc.gridy = 2;
         loginButton = new JButton("Login");
+        loginButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         loginButton.setBackground(new Color(0, 120, 215));
-        loginButton.setForeground(Color.white);
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setFocusPainted(false);
+        loginButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         inputPanel.add(loginButton, gbc);
 
+        // Center the form in the frame
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setBackground(new Color(245, 245, 245));
+        centerWrapper.add(inputPanel);
 
-
-
-        setLayout(new BorderLayout(10, 10));
-        add(inputPanel, BorderLayout.CENTER);
-
+        add(centerWrapper, BorderLayout.CENTER);
 
         admindao dbdao = new admindao();
 
@@ -71,59 +94,42 @@ public class AdminLogin extends JFrame {
                 String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
 
                 if (email.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(
-                            null,
+                    JOptionPane.showMessageDialog(null,
                             "Please fill all required fields ( Email, Password).",
-                            "Input Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (!email.matches(emailRegex)) {
-                    JOptionPane.showMessageDialog(
-                            null,
+                    JOptionPane.showMessageDialog(null,
                             "Please enter a valid email address.",
-                            "Invalid Email",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                            "Invalid Email", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (password.length() < 8 || password.length() > 16) {
-                    JOptionPane.showMessageDialog(
-                            null,
+                    JOptionPane.showMessageDialog(null,
                             "Password length should have a minimum of 8 characters or maximum of 16 characters!",
-                            "Invalid Password",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                            "Invalid Password", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 try {
-                    Document adminDoc = dbdao.loginAdmin(email,password);
+                    Document adminDoc = dbdao.loginAdmin(email, password);
                     if (adminDoc != null) {
                         String name = adminDoc.getString("name");
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "Login Successful!"
-                        );
-
-                        new AdminDashboard(name,adminDoc).setVisible(true);
+                        JOptionPane.showMessageDialog(null, "Login Successful!");
+                        new AdminDashboard(name, adminDoc).setVisible(true);
                         dispose();
                     } else {
-                        JOptionPane.showMessageDialog(
-                                null,
+                        JOptionPane.showMessageDialog(null,
                                 "Account not found!",
-                                "Invalid login details",
-                                JOptionPane.ERROR_MESSAGE
-                        );
+                                "Invalid login details", JOptionPane.ERROR_MESSAGE);
                     }
-
                 } catch (Exception ex) {
                     System.out.println(ex.getMessage());
                 }
-
             }
         });
-    }}
+    }
+}

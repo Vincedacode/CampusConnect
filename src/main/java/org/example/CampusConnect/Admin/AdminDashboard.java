@@ -5,6 +5,7 @@ import org.example.CampusConnect.DAO.*;
 import org.example.CampusConnect.Main;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.Date;
@@ -17,9 +18,7 @@ public class AdminDashboard extends JFrame {
     private JTable studentsTable, clubsTable, eventsTable, pendingTable;
     private DefaultTableModel studentsModel, clubsModel, eventsModel, pendingModel;
     private studentdao studentDao;
-
     private eventdao eventDao = new eventdao();
-
     private clubdao clubDao = new clubdao();
 
     public AdminDashboard(String name, Document adminData) {
@@ -28,52 +27,69 @@ public class AdminDashboard extends JFrame {
         this.studentDao = new studentdao();
 
         setTitle("Admin Dashboard");
-        setSize(1000, 600);
+        setSize(1100, 650);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        tabbedPane = new JTabbedPane();
+        // Main container with padding
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        tabbedPane.addTab("Students", createStudentsTab());
-        tabbedPane.addTab("Clubs", createClubsTab());
-        tabbedPane.addTab("Events", createEventsTab());
-        tabbedPane.addTab("Pending Approvals", createPendingTab());
-        tabbedPane.addTab("Logout", createLogoutTab());
+        // Header
+        JLabel headerLabel = new JLabel("Welcome, " + name + " 👋", SwingConstants.LEFT);
+        headerLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        headerLabel.setForeground(new Color(33, 33, 33));
+        headerLabel.setBorder(new EmptyBorder(0, 0, 10, 0));
 
-        add(tabbedPane);
+        mainPanel.add(headerLabel, BorderLayout.NORTH);
+
+        // Tabbed Pane Styling
+        tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        tabbedPane.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        tabbedPane.addTab("📚 Students", createStudentsTab());
+        tabbedPane.addTab("🏛 Clubs", createClubsTab());
+        tabbedPane.addTab("🎉 Events", createEventsTab());
+        tabbedPane.addTab("✅ Pending Approvals", createPendingTab());
+        tabbedPane.addTab("📊 Statistics", createStatisticsTab());
+        tabbedPane.addTab("🚪 Logout", createLogoutTab());
+
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+
+        add(mainPanel);
     }
 
-    // ------------------ Students Tab -------------------
+    private JScrollPane styleTable(JTable table) {
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        table.setRowHeight(25);
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        table.getTableHeader().setBackground(new Color(230, 230, 230));
+        table.getTableHeader().setForeground(Color.BLACK);
+        return new JScrollPane(table);
+    }
+
     private JPanel createStudentsTab() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        String[] columns = {"Name", "Email", "Department", "Joined Clubs" , "Registered Events"};
+        String[] columns = {"Name", "Email", "Department", "Joined Clubs", "Registered Events"};
         studentsModel = new DefaultTableModel(columns, 0);
         studentsTable = new JTable(studentsModel);
 
-        // 🔽 Fetch students from DB
         List<Document> allStudents = studentDao.getAllStudents();
         for (Document student : allStudents) {
-            String fullName = student.getString("Fullname");
-            String email = student.getString("Email");
-            String department = student.getString("Department");
-            List<String> joinedClubs = (List<String>) student.get("Joined_Clubs");
-            List<String> registeredEvents = (List<String>) student.get("Registered_Events");
-
             studentsModel.addRow(new Object[]{
-                    fullName,
-                    email,
-                    department,
-                    joinedClubs != null ? String.join(", ", joinedClubs) : "-",
-                    registeredEvents != null ? String.join(", ", registeredEvents) : "-"
+                    student.getString("Fullname"),
+                    student.getString("Email"),
+                    student.getString("Department"),
+                    listToString((List<String>) student.get("Joined_Clubs")),
+                    listToString((List<String>) student.get("Registered_Events"))
             });
         }
 
-        panel.add(new JScrollPane(studentsTable), BorderLayout.CENTER);
+        panel.add(styleTable(studentsTable), BorderLayout.CENTER);
         return panel;
     }
 
-    // ------------------ Clubs Tab -------------------
     private JPanel createClubsTab() {
         JPanel panel = new JPanel(new BorderLayout());
 
@@ -82,150 +98,173 @@ public class AdminDashboard extends JFrame {
         clubsTable = new JTable(clubsModel);
 
         List<Document> approvedClubs = clubDao.getApprovedClubs();
-        for(Document clubs: approvedClubs){
-            String clubName = clubs.getString("Club_name");
-            String description = clubs.getString("Description");
-            String adminName = clubs.getString("Admin_name");
-            String approved = "Yes";
-          //  String membersCount = (String) clubs.get("Members");
-
+        for (Document clubs : approvedClubs) {
             clubsModel.addRow(new Object[]{
-                    clubName,
-                    description,
-                    adminName,
-                    approved,
-                //    membersCount
+                    clubs.getString("Club_name"),
+                    clubs.getString("Description"),
+                    clubs.getString("Admin_name"),
+                    "Yes"
             });
-
         }
 
-
-        panel.add(new JScrollPane(clubsTable), BorderLayout.CENTER);
+        panel.add(styleTable(clubsTable), BorderLayout.CENTER);
         return panel;
     }
 
-    // ------------------ Events Tab -------------------
     private JPanel createEventsTab() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        String[] columns = {"Event Title", "Date", "Club", "Approved"};
+        String[] columns = {"Event Title", "Date", "Time", "Club", "Approved"};
         eventsModel = new DefaultTableModel(columns, 0);
         eventsTable = new JTable(eventsModel);
 
         List<Document> approvedEvents = eventDao.getApprovedEvents();
-        for (Document events : approvedEvents){
+        for (Document events : approvedEvents) {
             String eventTitle = events.getString("Title");
-           Date date = events.getDate("Date");
-          //  String time = events.getString("Time");
+
+            // Handle Date
+            Date date = events.getDate("Date");
+            String formattedDate = (date != null)
+                    ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(date)
+                    : "N/A";
+
+            // Handle Time safely (String or Date in DB)
+            Object timeObj = events.get("Time");
+            String time;
+            if (timeObj instanceof Date) {
+                time = new java.text.SimpleDateFormat("HH:mm").format((Date) timeObj);
+            } else {
+                time = String.valueOf(timeObj != null ? timeObj : "N/A");
+            }
+
             String clubName = events.getString("Club_Name");
             String approved = "Yes";
 
             eventsModel.addRow(new Object[]{
                     eventTitle,
-                   date,
-                   // time,
+                    formattedDate,
+                    time,
                     clubName,
                     approved
             });
         }
 
-
-
         panel.add(new JScrollPane(eventsTable), BorderLayout.CENTER);
         return panel;
     }
 
-    // ------------------ Pending Approvals Tab -------------------
+
+
     private JPanel createPendingTab() {
         JPanel panel = new JPanel(new BorderLayout());
-
-
 
         String[] columns = {"Type", "Name", "Submitted By", "Approve"};
         pendingModel = new DefaultTableModel(columns, 0) {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 3) { // Approved column
-                    return Boolean.class; // Checkbox
-                }
-                return String.class;
+                return columnIndex == 3 ? Boolean.class : String.class;
             }
-
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 3; // Only checkbox is editable
+                return column == 3;
             }
         };
 
         pendingTable = new JTable(pendingModel);
 
-
         List<Document> pendingEvents = eventDao.getPendingEvents();
         for (Document event : pendingEvents) {
-            String title = event.getString("Title");
-            String clubName = event.getString("Club_Name");
-
-            pendingModel.addRow(new Object[]{
-                    "Event",
-                    title,
-                    clubName,
-                    false
-            });
+            pendingModel.addRow(new Object[]{"Event", event.getString("Title"), event.getString("Club_Name"), false});
         }
 
         List<Document> pendingClubs = clubDao.getPendingClubs();
         for (Document club : pendingClubs) {
-            String clubName = club.getString("Club_name");
-            String adminName = club.getString("Admin_name");
-
-            pendingModel.addRow(new Object[]{
-                    "Club",
-                    clubName,
-                    adminName,
-                    false
-            });
+            pendingModel.addRow(new Object[]{"Club", club.getString("Club_name"), club.getString("Admin_name"), false});
         }
 
         pendingTable.getModel().addTableModelListener(e -> {
             int row = e.getFirstRow();
             int col = e.getColumn();
 
-            if (col == 3) { // Checkbox column
-                Boolean isApproved = (Boolean) pendingTable.getValueAt(row, col);
-                if (isApproved != null && isApproved) {
-                    String type = (String) pendingTable.getValueAt(row, 0);
-                    String name = (String) pendingTable.getValueAt(row, 1);
+            if (col == 3 && Boolean.TRUE.equals(pendingTable.getValueAt(row, col))) {
+                String type = (String) pendingTable.getValueAt(row, 0);
+                String name = (String) pendingTable.getValueAt(row, 1);
 
-                    if (type.equalsIgnoreCase("Event")) {
-                        eventDao.approveEvent(name);
-                    } else if (type.equalsIgnoreCase("Club")) {
-                        clubDao.approveClub(name);
-                    }
-
-                    // Remove row from table
-                    pendingModel.removeRow(row);
-
-                    JOptionPane.showMessageDialog(this, type + " '" + name + "' approved!");
+                if (type.equalsIgnoreCase("Event")) {
+                    eventDao.approveEvent(name);
+                } else if (type.equalsIgnoreCase("Club")) {
+                    clubDao.approveClub(name);
                 }
+
+                pendingModel.removeRow(row);
+                JOptionPane.showMessageDialog(this, type + " '" + name + "' approved!");
             }
         });
 
-
-        panel.add(new JScrollPane(pendingTable), BorderLayout.CENTER);
+        panel.add(styleTable(pendingTable), BorderLayout.CENTER);
         return panel;
-
     }
 
+    private JPanel createStatisticsTab() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-    // ------------------ Logout Tab -------------------
+        admindao adminDao = new admindao();
+
+        long totalClubs = adminDao.getTotalClubs();
+        long totalEvents = adminDao.getTotalEvents();
+        JLabel summaryLabel = new JLabel("📌 Total Clubs: " + totalClubs + " | 🎯 Total Events: " + totalEvents);
+        summaryLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        summaryLabel.setForeground(new Color(0, 102, 102));
+        panel.add(summaryLabel, BorderLayout.NORTH);
+
+        String[] clubColumns = {"Club Name", "Members"};
+        DefaultTableModel clubStatsModel = new DefaultTableModel(clubColumns, 0);
+        for (Document doc : adminDao.getMembersPerClub()) {
+            clubStatsModel.addRow(new Object[]{doc.getString("Club_name"), doc.getInteger("memberCount")});
+        }
+        JTable clubStatsTable = new JTable(clubStatsModel);
+
+        String[] eventColumns = {"Month", "Number of Events"};
+        DefaultTableModel eventStatsModel = new DefaultTableModel(eventColumns, 0);
+        String[] monthNames = {"January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"};
+
+        for (Document doc : adminDao.getEventsPerMonth()) {
+            int monthNumber = doc.getInteger("_id"); // 1-based month from DB
+            String monthName = monthNames[monthNumber - 1];
+            eventStatsModel.addRow(new Object[]{monthName, doc.getInteger("count")});
+        }
+
+        JTable eventStatsTable = new JTable(eventStatsModel);
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                styleTable(clubStatsTable), styleTable(eventStatsTable));
+        splitPane.setDividerLocation(500);
+
+        panel.add(splitPane, BorderLayout.CENTER);
+        return panel;
+    }
+
     private JPanel createLogoutTab() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton logoutBtn = new JButton("Logout");
+        logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        logoutBtn.setBackground(new Color(200, 0, 0));
+        logoutBtn.setForeground(Color.WHITE);
+        logoutBtn.setFocusPainted(false);
+        logoutBtn.setPreferredSize(new Dimension(120, 35));
+
         logoutBtn.addActionListener(e -> {
             new Main().setVisible(true);
             dispose();
         });
+
         panel.add(logoutBtn);
         return panel;
+    }
+
+    private String listToString(List<String> list) {
+        return (list != null && !list.isEmpty()) ? String.join(", ", list) : "-";
     }
 }
