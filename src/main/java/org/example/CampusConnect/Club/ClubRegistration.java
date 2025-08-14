@@ -4,12 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import org.example.CampusConnect.DAO.clubdao;
+import org.example.CampusConnect.Main;
 
 public class ClubRegistration extends JFrame {
     private JTextField nameField;
     private JTextField description;
     private JTextField adminName;
     private JButton createButton;
+    private JButton backButton; // <-- Back button
 
     public ClubRegistration() {
         clubdao dbdao = new clubdao();
@@ -76,11 +78,22 @@ public class ClubRegistration extends JFrame {
                 createButton.setBackground(new Color(33, 150, 243));
             }
         });
-
         inputPanel.add(createButton, gbc);
+
+        // Back Button
+        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
+        backButton = new JButton("Back");
+        backButton.setBackground(new Color(158, 158, 158));
+        backButton.setForeground(Color.WHITE);
+        backButton.setFocusPainted(false);
+        backButton.setPreferredSize(new Dimension(150, 35));
+        backButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        inputPanel.add(backButton, gbc);
+
         add(inputPanel, BorderLayout.CENTER);
 
-        // Button Action
+        // Create button action
         createButton.addActionListener(e -> {
             String name = nameField.getText().trim();
             String describe = description.getText().trim();
@@ -122,5 +135,10 @@ public class ClubRegistration extends JFrame {
             description.setText("");
             adminName.setText("");
         });
+
+       backButton.addActionListener(e->{
+           new Main().setVisible(true);
+           dispose();
+       });
     }
 }

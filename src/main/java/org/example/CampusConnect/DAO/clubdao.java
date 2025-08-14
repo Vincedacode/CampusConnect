@@ -87,6 +87,21 @@ public class clubdao {
         return approvedClubs;
     }
 
+    public List<Document> getClubsByStudent(String studentName) {
+        List<Document> joinedClubs = new ArrayList<>();
+        try {
+            Bson filter = Filters.in("Members", studentName); // Checks if student is in Members array
+            MongoCursor<Document> cursor = collection.find(filter).iterator();
+            while (cursor.hasNext()) {
+                joinedClubs.add(cursor.next());
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching joined clubs: " + e.getMessage());
+        }
+        return joinedClubs;
+    }
+
+
     public void addStudentToClub(String clubName, String studentName) {
         collection.updateOne(
                 eq("Club_name", clubName),

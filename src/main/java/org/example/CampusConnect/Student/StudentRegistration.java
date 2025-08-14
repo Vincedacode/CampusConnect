@@ -1,6 +1,7 @@
 package org.example.CampusConnect.Student;
 
 import org.example.CampusConnect.DAO.studentdao;
+import org.example.CampusConnect.Main;
 
 import javax.swing.*;
 import java.awt.*;
@@ -107,16 +108,27 @@ public class StudentRegistration extends JFrame {
         registerBtn.setPreferredSize(new Dimension(120, 35));
         formPanel.add(registerBtn, gbc);
 
+
         // ===== FOOTER LOGIN PANEL =====
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         footerPanel.setBackground(Color.WHITE);
+
+        JButton backButton = new JButton("Back");
+        backButton.setBackground(new Color(128, 128, 128));
+        backButton.setForeground(Color.WHITE);
+        backButton.setFocusPainted(false);
+
         JLabel loginLabel = new JLabel("Already have an account?");
         JButton loginButton = new JButton("Login");
         loginButton.setBackground(new Color(34, 139, 34));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
+
+        footerPanel.add(backButton); // Add Back button first
         footerPanel.add(loginLabel);
         footerPanel.add(loginButton);
+
+
 
         // ===== ADD TO FRAME =====
         setLayout(new BorderLayout());
@@ -188,6 +200,11 @@ public class StudentRegistration extends JFrame {
 
         loginButton.addActionListener(e -> {
             new StudentLogin().setVisible(true);
+            dispose();
+        });
+
+        backButton.addActionListener(e ->{
+            new Main().setVisible(true);
             dispose();
         });
     }

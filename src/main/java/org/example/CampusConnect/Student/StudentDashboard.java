@@ -38,6 +38,8 @@ public class StudentDashboard extends JFrame {
 
         tabbedPane.add("📚 Available Clubs", createClubsTab());
         tabbedPane.add("🎉 Available Events", createEventsTab());
+        tabbedPane.add("Joined Clubs", createJoinedClubsTab());
+        tabbedPane.add("Joined Events", createJoinedEventsTab());
         tabbedPane.add("🚪 Logout", createLogoutTab());
 
         add(tabbedPane, BorderLayout.CENTER);
@@ -171,6 +173,94 @@ public class StudentDashboard extends JFrame {
         panel.add(new JScrollPane(eventsTable), BorderLayout.CENTER);
         return panel;
     }
+
+    private JPanel createJoinedClubsTab() {
+        JPanel panel = new JPanel(new BorderLayout(15, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JLabel title = new JLabel("Your Joined Clubs");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        panel.add(title, BorderLayout.NORTH);
+
+        String[] columns = {"Club Name", "Description", "Admin"};
+        DefaultTableModel joinedClubsModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable joinedClubsTable = new JTable(joinedClubsModel);
+        joinedClubsTable.setRowHeight(25);
+        joinedClubsTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        joinedClubsTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        // Load student's joined clubs
+        List<String> joinedClubs = studentDao.getJoinedClubs(fullName);
+        List<Document> clubs = clubDao.getClubsByStudent(fullName);
+
+        for (Document club : clubs) {
+            String clubName = club.getString("Club_name");
+            if (joinedClubs.contains(clubName)) {
+                joinedClubsModel.addRow(new Object[]{
+                        clubName,
+                        club.getString("Description"),
+                        club.getString("Admin_name")
+                });
+            }
+        }
+
+
+        panel.add(new JScrollPane(joinedClubsTable), BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel createJoinedEventsTab() {
+        JPanel panel = new JPanel(new BorderLayout(15, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JLabel title = new JLabel("Your Registered Events");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        panel.add(title, BorderLayout.NORTH);
+
+        String[] columns = {"Event Title", "Date", "Club"};
+        DefaultTableModel joinedEventsModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable joinedEventsTable = new JTable(joinedEventsModel);
+        joinedEventsTable.setRowHeight(25);
+        joinedEventsTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        joinedEventsTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        // Load student's joined events
+        List<Document> joinedEvents = eventDao.getEventsByStudent(fullName);
+
+        for (Document event : joinedEvents) {
+            Date dateObj = event.getDate("Date");
+            String formattedDate = (dateObj != null)
+                    ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(dateObj)
+                    : "N/A";
+
+            joinedEventsModel.addRow(new Object[]{
+                    event.getString("Title"),
+                    formattedDate,
+                    event.getString("Club_Name")
+            });
+        }
+
+
+
+        panel.add(new JScrollPane(joinedEventsTable), BorderLayout.CENTER);
+        return panel;
+    }
+
+
+
+
 
 
     private JPanel createLogoutTab() {

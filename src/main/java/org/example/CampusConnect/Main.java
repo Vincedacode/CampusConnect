@@ -15,6 +15,8 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(0, 0));
 
+
+
         // ----- HEADER -----
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(25, 118, 210));

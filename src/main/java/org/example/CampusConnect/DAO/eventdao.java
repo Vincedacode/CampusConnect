@@ -88,6 +88,21 @@ public class eventdao {
         return approvedEvents;
     }
 
+    public List<Document> getEventsByStudent(String studentName) {
+        List<Document> joinedEvents = new ArrayList<>();
+        try {
+            Bson filter = Filters.in("Attendees", studentName); // Checks if student is in Attendees array
+            MongoCursor<Document> cursor = collection.find(filter).iterator();
+            while (cursor.hasNext()) {
+                joinedEvents.add(cursor.next());
+            }
+        } catch (Exception e) {
+            System.out.println("Error fetching joined events: " + e.getMessage());
+        }
+        return joinedEvents;
+    }
+
+
     public void addStudentToAttendees(String eventTitle, String studentName){
         collection.updateOne(
                 eq("Title", eventTitle),
